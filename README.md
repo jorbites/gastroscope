@@ -30,6 +30,29 @@ pnpm test
 pnpm build
 ```
 
+## Deploying to Vercel (GitHub Organization Repo via Vercel CLI)
+
+Because Vercel Hobby does not allow direct Git auto-deploys from GitHub Organization repos, deployment runs via GitHub Actions (`.github/workflows/deploy.yml`) using the Vercel CLI:
+
+1. **Link the project once locally** (creates a gitignored `.vercel/project.json`):
+   ```bash
+   pnpm dlx vercel@latest login
+   pnpm dlx vercel@latest link
+   cat .vercel/project.json
+   ```
+   Copy `orgId` and `projectId` from `.vercel/project.json`.
+2. **Create a Vercel token** at [vercel.com/account/tokens](https://vercel.com/account/tokens) (scoped to your personal Hobby account).
+3. **Add 3 GitHub Actions secrets** in `github.com/jorbites/gastroscope` → *Settings → Secrets and variables → Actions*:
+   - `VERCEL_TOKEN`
+   - `VERCEL_ORG_ID` (`orgId` from step 1)
+   - `VERCEL_PROJECT_ID` (`projectId` from step 1)
+4. **Add the 4 runtime env vars in Vercel** (*Project Settings → Environment Variables → Production*, or push them via `pnpm dlx vercel@latest env add <NAME> production`):
+   - `TURSO_DATABASE_URL`
+   - `TURSO_AUTH_TOKEN` *(read-only token recommended)*
+   - `DASHBOARD_PASSWORD_HASH`
+   - `SESSION_SECRET`
+5. **Push to `main`** (or trigger *Actions → Deploy to Vercel → Run workflow*).
+
 ## Roadmap
 
 See [ROADMAP.md](./ROADMAP.md) for planned Phase 2 features (including optional read-only MongoDB domain KPIs).

@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import DashboardApp from '../components/DashboardApp';
+import { fetchDashboardSnapshot, parseDateRange } from '../lib/turso';
+
+const range = parseDateRange(Astro.url.searchParams.get('range'));
+const initialSnapshot = await fetchDashboardSnapshot(range);
+---
+
+<Layout title="Gastroscope — Jorbites Analytics">
+  <DashboardApp client:load initialSnapshot={initialSnapshot} />
+</Layout>

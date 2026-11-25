@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-avocado-400: #86efac;
+  --color-avocado-500: #4ade80;
+  --color-avocado-600: #22c55e;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-neutral-950 text-neutral-100 antialiased;
+  }
+}

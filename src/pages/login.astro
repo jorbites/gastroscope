@@ -1,0 +1,84 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SESSION_COOKIE_NAME, getAuthEnv, verifySessionToken } from '../lib/auth';
+
+const { sessionSecret } = getAuthEnv();
+const existing = Astro.cookies.get(SESSION_COOKIE_NAME)?.value;
+if (verifySessionToken(existing, sessionSecret)) {
+  return Astro.redirect('/');
+}
+---
+
+<Layout title="Sign In — Gastroscope">
+  <main class="flex min-h-screen items-center justify-center px-4">
+    <div class="w-full max-w-sm rounded-2xl border border-neutral-800 bg-neutral-900/80 p-8 shadow-xl">
+      <div class="mb-6 flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-avocado-500/15 text-lg font-bold text-avocado-400">
+          G
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white">Gastroscope</h1>
+          <p class="text-xs text-neutral-400">Jorbites Cookieless Analytics</p>
+        </div>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label for="password" class="mb-1.5 block text-xs font-medium text-neutral-300">
+            Dashboard Password
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autocomplete="current-password"
+            placeholder="Enter admin password"
+            class="w-full rounded-xl border border-neutral-700 bg-neutral-950 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-avocado-500 focus:ring-2 focus:ring-avocado-500/20"
+          />
+        </div>
+        <p id="error-msg" class="hidden text-xs text-red-400"></p>
+        <button
+          type="submit"
+          class="w-full cursor-pointer rounded-xl bg-avocado-500 px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-avocado-400 disabled:opacity-60"
+        >
+          Sign In
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('login-form') as HTMLFormElement;
+    const errorEl = document.getElementById('error-msg') as HTMLParagraphElement;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.classList.add('hidden');
+      const password = (document.getElementById('password') as HTMLInputElement).value;
+      const btn = form.querySelector('button') as HTMLButtonElement;
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password }),
+        });
+
+        if (res.ok) {
+          window.location.href = '/';
+          return;
+        }
+        const data = await res.json().catch(() => ({ error: 'Login failed' }));
+        errorEl.textContent = data.error || 'Invalid password';
+        errorEl.classList.remove('hidden');
+      } catch {
+        errorEl.textContent = 'Network error. Please try again.';
+        errorEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</Layout>
